@@ -2,6 +2,10 @@
 
 这是一个适合初学者理解和继续开发的 Python 项目。网页 **不限定技术岗或实习岗**：核心功能是从 2～10 份同类 JD 生成有原文依据的“岗位方向画像”，再按需与简历对照；原有的单岗位精读仍然保留。
 
+**在线体验：**[求职对照台（Streamlit）](https://ai-jd-analyzer-aashlks.streamlit.app/)
+
+这是公开测试版。首次访问时如果应用处于休眠状态，按页面提示唤醒后等待片刻即可；无需登录 Streamlit。
+
 ## 怎样试用本地网页
 
 在项目目录的 VS Code 终端运行。如果已经打开旧网页，先按 `Ctrl+C` 停止服务，再重新启动：
@@ -40,7 +44,7 @@
 
 ## 发布给其他人使用
 
-项目已经按 Streamlit Community Cloud 的结构准备好：`web_app.py` 是入口，`requirements.txt` 声明依赖，`.streamlit/config.toml` 保存非敏感主题设置；真实密钥通过线上 Secrets 注入。完整的 GitHub 推送、Secrets、上线验收和紧急换 Key 步骤见 [DEPLOYMENT.md](DEPLOYMENT.md)。
+项目已经部署到 [Streamlit Community Cloud](https://ai-jd-analyzer-aashlks.streamlit.app/)：`web_app.py` 是入口，`requirements.txt` 声明依赖，`.streamlit/config.toml` 保存非敏感主题设置；真实密钥通过线上 Secrets 注入。完整的 GitHub 推送、Secrets、上线验收和紧急换 Key 步骤见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
 发布后它仍是**公开测试版**，而不是已经具备账号、数据库和强制消费配额的正式 SaaS。右上方“访客模式 · 登录待开放”是未来账号入口的版面预留；当前每位用户的数据只存在自己的浏览会话中。
 
