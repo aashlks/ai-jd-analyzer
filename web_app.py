@@ -6,6 +6,7 @@ from collections import Counter
 from urllib.parse import urlparse
 
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 from openai import (
     APIConnectionError,
@@ -32,6 +33,7 @@ from report_export import (
     report_filename,
 )
 from resume_reader import ResumeReadError, extract_resume_text, redact_basic_contacts
+from ui_config import COLUMN_RATIOS, COMPONENT_HEIGHTS, css_variable_block
 
 
 OFFER_PAGE_SIZE = 20
@@ -56,42 +58,44 @@ def positive_env_int(name: str, default: int) -> int:
 MAX_MODEL_REQUESTS_PER_SESSION = positive_env_int("MAX_MODEL_REQUESTS_PER_SESSION", 8)
 st.set_page_config(page_title="求职对照台", layout="wide")
 
-st.markdown(
-    """
+PAGE_CSS = """
     <style>
     :root {
-        --ink: #223247;
-        --muted: #68798c;
-        --blue: #6f8fac;
-        --blue-dark: #536f89;
-        --blue-pale: #eaf1f7;
-        --line: #dbe5ed;
-        --paper: #ffffff;
-        --canvas: #f5f8fb;
+        __CSS_VARIABLES__
+    }
+    html, body, [class*="css"] {
+        font-family: var(--body-font);
+        font-size: var(--body-size);
     }
     .stApp {
         background:
-            radial-gradient(circle at 92% 4%, rgba(157, 183, 205, .18), transparent 26rem),
+            radial-gradient(circle at 92% 2%, rgba(139, 170, 197, .16), transparent 28rem),
             var(--canvas);
         color: var(--ink);
     }
     [data-testid="stHeader"] { background: rgba(245, 248, 251, .82); }
     #MainMenu, footer, [data-testid="stToolbar"] { visibility: hidden; }
-    .block-container { max-width: 1180px; padding-top: 1.7rem; padding-bottom: 3rem; }
+    .block-container {
+        max-width: var(--app-max-width);
+        padding-top: var(--app-top-padding);
+        padding-bottom: var(--app-bottom-padding);
+    }
     h1, h2, h3, h4 { color: var(--ink); letter-spacing: -0.02em; }
-    p, label { color: var(--ink); }
+    p, label { color: var(--ink); line-height: var(--body-line-height); }
     [data-testid="stCaptionContainer"] p { color: var(--muted); }
     [data-testid="stVerticalBlockBorderWrapper"] {
         background: rgba(255, 255, 255, .88);
         border-color: var(--line);
-        border-radius: 16px;
-        box-shadow: 0 8px 30px rgba(62, 86, 110, .045);
+        border-radius: var(--panel-radius);
+        box-shadow: var(--panel-shadow);
+        padding: var(--panel-padding);
     }
     .stButton > button, .stLinkButton > a {
-        border-radius: 10px;
+        border-radius: var(--button-radius);
         border-color: #cddae5;
-        min-height: 2.65rem;
+        min-height: var(--button-height);
         transition: all .16s ease;
+        font-weight: 600;
     }
     .stButton > button:hover, .stLinkButton > a:hover {
         border-color: var(--blue);
@@ -103,6 +107,7 @@ st.markdown(
         border-color: var(--blue-dark);
         color: white;
     }
+    .stButton > button[kind="primary"] p { color: white; }
     .stButton > button:disabled {
         background: #edf2f6 !important;
         border-color: #dce5ec !important;
@@ -120,12 +125,17 @@ st.markdown(
     [data-baseweb="select"] > div {
         background: var(--paper);
         border-color: var(--line);
+        border-radius: var(--input-radius);
     }
     [data-testid="stMetric"] {
         background: var(--paper);
         border: 1px solid var(--line);
-        border-radius: 14px;
+        border-radius: var(--metric-radius);
         padding: 1rem 1.1rem;
+    }
+    .st-key-desktop-header {
+        min-height: var(--header-min-height);
+        padding: .15rem 0 .85rem;
     }
     .brand-mark {
         display: flex;
@@ -155,48 +165,151 @@ st.markdown(
         top: .57rem;
         left: .57rem;
     }
-    .hero {
-        padding: 4.6rem 4.2rem;
+    .page-intro {
+        padding: var(--page-intro-padding);
         border: 1px solid var(--line);
-        border-radius: 24px;
-        background: linear-gradient(135deg, rgba(255,255,255,.97), rgba(232,240,247,.82));
-        box-shadow: 0 22px 65px rgba(64, 91, 117, .08);
-        margin: 1.25rem 0 1.4rem;
+        border-radius: var(--page-intro-radius);
+        background: linear-gradient(135deg, rgba(255,255,255,.96), var(--blue-mist));
+        box-shadow: var(--panel-shadow);
+        margin: .7rem 0 var(--section-gap);
     }
-    .hero-eyebrow {
+    .page-kicker, .section-kicker {
         color: var(--blue-dark);
         font-size: .78rem;
         font-weight: 700;
-        letter-spacing: .16em;
+        letter-spacing: .14em;
         text-transform: uppercase;
-        margin-bottom: 1rem;
+        margin-bottom: .45rem;
     }
-    .hero h1 {
-        max-width: 760px;
-        font-size: clamp(2.45rem, 5vw, 4.65rem);
-        line-height: 1.08;
-        margin: 0 0 1.25rem;
+    .page-intro h1 {
+        font-size: var(--page-title-size);
+        line-height: 1.18;
+        margin: 0 0 .5rem;
     }
-    .hero p {
-        max-width: 680px;
+    .page-intro p {
+        max-width: var(--page-copy-width);
         color: var(--muted);
-        font-size: 1.08rem;
-        line-height: 1.8;
         margin: 0;
     }
-    .section-kicker {
-        color: var(--blue-dark);
-        font-size: .8rem;
-        font-weight: 700;
-        letter-spacing: .12em;
-        margin-top: 2.6rem;
-        text-transform: uppercase;
+    div[data-testid="stButtonGroup"] {
+        background: rgba(255, 255, 255, .7);
+        border: 1px solid var(--line);
+        border-radius: calc(var(--button-radius) + 2px);
+        padding: .22rem;
+        width: fit-content;
     }
+    div[data-testid="stButtonGroup"] button {
+        border-radius: var(--button-radius);
+        min-height: 2.45rem;
+        padding-left: 1.15rem;
+        padding-right: 1.15rem;
+    }
+
+    /* The welcome screen is a separate full-viewport composition. */
+    .st-key-landing-screen {
+        width: min(var(--landing-max-width), 100%);
+        min-height: var(--landing-min-height);
+        margin: 0 auto;
+        padding: var(--landing-outer-padding);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .landing-brand {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        font-weight: 750;
+        letter-spacing: .01em;
+        margin-bottom: 1.35rem;
+    }
+    .landing-brand-note {
+        color: var(--blue-dark);
+        background: var(--blue-pale);
+        border-radius: 999px;
+        font-size: .76rem;
+        padding: .28rem .62rem;
+    }
+    .st-key-landing-hero {
+        padding: var(--landing-hero-padding);
+        border: 1px solid rgba(190, 207, 221, .8);
+        border-radius: var(--landing-hero-radius);
+        background:
+            radial-gradient(circle at 88% 5%, rgba(130, 165, 194, .23), transparent 28rem),
+            linear-gradient(145deg, rgba(255,255,255,.99), rgba(235,242,248,.92));
+        box-shadow: 0 28px 80px rgba(55, 80, 104, .11);
+    }
+    .landing-eyebrow {
+        color: var(--blue-dark);
+        font-size: .78rem;
+        font-weight: 750;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        margin-bottom: 1.25rem;
+    }
+    .landing-title {
+        max-width: var(--landing-title-width);
+        font-size: var(--landing-title-size);
+        line-height: .99;
+        letter-spacing: -.055em;
+        margin: 0 0 1.55rem;
+    }
+    .landing-copy {
+        max-width: var(--landing-copy-width);
+        color: var(--muted);
+        font-size: 1.08rem;
+        line-height: 1.85;
+        margin: 0 0 1.65rem;
+    }
+    .st-key-landing-action { width: var(--landing-cta-width); }
+    .st-key-landing-action button { min-height: 3.15rem; font-size: 1rem; }
+    .landing-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .55rem;
+        margin-top: 1.35rem;
+    }
+    .landing-badge {
+        color: var(--blue-dark);
+        background: rgba(255,255,255,.7);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: .38rem .72rem;
+        font-size: var(--small-size);
+    }
+    .landing-feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--section-gap);
+        margin-top: var(--section-gap);
+    }
+    .landing-feature-card {
+        min-height: var(--landing-feature-min-height);
+        padding: 1.35rem;
+        background: rgba(255,255,255,.78);
+        border: 1px solid var(--line);
+        border-radius: var(--landing-feature-radius);
+    }
+    .landing-feature-card span {
+        color: var(--blue-dark);
+        font-size: .77rem;
+        font-weight: 750;
+        letter-spacing: .12em;
+    }
+    .landing-feature-card h3 { margin: .55rem 0 .45rem; font-size: 1.05rem; }
+    .landing-feature-card p { margin: 0; color: var(--muted); font-size: .91rem; }
+    .landing-footnote { color: var(--muted); font-size: .82rem; margin: 1rem .2rem 0; }
     .st-key-mobile-header { display: none; }
     @media (max-width: 700px) {
         .block-container { padding: 1rem 1rem 2.5rem; }
-        .hero { padding: 2.6rem 1.5rem; }
-        .hero h1 { font-size: 2.35rem; }
+        .st-key-landing-screen { padding: 1rem; justify-content: flex-start; }
+        .st-key-landing-hero { padding: 2.5rem 1.35rem; border-radius: 24px; }
+        .landing-title { font-size: clamp(2.7rem, 14vw, 4.1rem); }
+        .landing-copy { font-size: 1rem; }
+        .st-key-landing-action { width: 100%; }
+        .landing-feature-grid { grid-template-columns: 1fr; }
+        .landing-feature-card { min-height: auto; }
+        .page-intro { padding: 1.2rem; }
         .st-key-desktop-header { display: none; }
         .st-key-mobile-header { display: block; }
         .st-key-mobile-header [data-testid="stHorizontalBlock"] {
@@ -230,7 +343,10 @@ st.markdown(
         .brand-dot:after { top: .45rem; left: .45rem; }
     }
     </style>
-    """,
+    """
+
+st.markdown(
+    PAGE_CSS.replace("__CSS_VARIABLES__", css_variable_block()),
     unsafe_allow_html=True,
 )
 
@@ -243,8 +359,18 @@ if "group_profiles" not in st.session_state:
     st.session_state.group_profiles = {}
 if "group_feedback" not in st.session_state:
     st.session_state.group_feedback = {}
-if "active_page" not in st.session_state:
-    st.session_state.active_page = "首页"
+had_active_page = "active_page" in st.session_state
+if "entered_app" not in st.session_state:
+    # Tests and older sessions may already have selected a work page.  A truly
+    # fresh visitor gets the independent welcome screen.
+    st.session_state.entered_app = had_active_page and st.session_state.active_page in (
+        "找岗位",
+        "我的岗位",
+        "分析中心",
+        "简历分析",
+    )
+if "active_page" not in st.session_state or st.session_state.active_page == "首页":
+    st.session_state.active_page = "找岗位"
 elif st.session_state.active_page == "简历分析":
     # Preserve an older browser session after the page was renamed.
     st.session_state.active_page = "分析中心"
@@ -326,6 +452,14 @@ def open_page(page: str) -> None:
     st.session_state.active_page = page
 
 
+def enter_app() -> None:
+    """Leave the one-time welcome screen and open the main workspace."""
+
+    st.session_state.entered_app = True
+    st.session_state.active_page = "找岗位"
+    st.session_state.scroll_workspace_top = True
+
+
 def open_analysis(mode: str) -> None:
     """Open the analysis center in the mode explicitly chosen by the user."""
 
@@ -399,7 +533,7 @@ def show_target_job(job: dict) -> None:
             st.text_area(
                 "岗位原文",
                 value=job["jd_text"],
-                height=240,
+                height=COMPONENT_HEIGHTS["source_jd"],
                 disabled=True,
                 key=f"target-jd-{job['id']}",
             )
@@ -701,7 +835,7 @@ def render_manual_add() -> None:
         source_url = st.text_input("来源链接（可选）", placeholder="方便日后回到原岗位页")
         jd_text = st.text_area(
             "岗位 JD",
-            height=240,
+            height=COMPONENT_HEIGHTS["manual_jd"],
             max_chars=MAX_MANUAL_JD_CHARS,
             placeholder="粘贴岗位职责和任职要求",
         )
@@ -807,7 +941,7 @@ def render_offer_search() -> None:
             f"Offer岛返回约 {total} 条 · 第 {page_number} 页显示 {len(jobs)} 条"
             f" · 本页来自 {len(companies)} 家已知公司。"
         )
-        prev_col, next_col, _ = st.columns([1, 1, 5])
+        prev_col, next_col, _ = st.columns(COLUMN_RATIOS["pagination"])
         with prev_col:
             if st.button("上一页", disabled=offset == 0):
                 try:
@@ -851,8 +985,11 @@ def render_offer_search() -> None:
 
 
 def render_find_page() -> None:
-    st.subheader("先搜索并收集感兴趣的岗位")
-    st.caption("优先自动搜索；如果没有搜到，或岗位来自 BOSS 等未接入来源，再手动粘贴 JD。")
+    render_page_intro(
+        "COLLECT",
+        "先建立你的岗位样本",
+        "优先自动搜索；如果没有搜到，或岗位来自 BOSS 等未接入来源，再手动粘贴 JD。",
+    )
     saved_count = st.empty()
     offer_tab, manual_tab = st.tabs(["自动搜索（Offer岛）", "手动添加 JD"])
     with offer_tab:
@@ -865,15 +1002,18 @@ def render_find_page() -> None:
 
 
 def render_job_list() -> None:
-    st.subheader("我的岗位")
-    st.caption("加入的岗位会直接列在下面。勾选一个或多个，组成待分析清单。")
+    render_page_intro(
+        "SHORTLIST",
+        "整理要比较的岗位",
+        "加入的岗位会直接列在下面。勾选多个同类岗位生成方向画像，也可以只精读其中一个。",
+    )
     saved_jobs = st.session_state.saved_jobs
     if not saved_jobs:
         st.info("这里还没有岗位。先到“找岗位”自动搜索；没有合适结果时再手动添加 JD。")
         st.button("去找岗位", on_click=open_page, args=("找岗位",))
         return
 
-    choose_col, clear_col, _ = st.columns([1, 1, 6])
+    choose_col, clear_col, _ = st.columns(COLUMN_RATIOS["shortlist_select"])
     with choose_col:
         st.button("全选", on_click=select_all_jobs, args=(True,), use_container_width=True)
     with clear_col:
@@ -903,7 +1043,7 @@ def render_job_list() -> None:
         st.caption("请勾选同一类型的岗位，并核对发布时间。样本数量和公司分布只是质量提示，不代表行业统计结论。")
 
     st.caption("勾选本身不会调用模型。多个同类岗位用于方向画像；具体投递时可以精读其中一条。")
-    group_col, single_col, _ = st.columns([2, 2, 4])
+    group_col, single_col, _ = st.columns(COLUMN_RATIOS["shortlist_actions"])
     with group_col:
         st.button(
             f"分析岗位方向（已选 {len(chosen_ids)} 条）",
@@ -930,7 +1070,9 @@ def render_job_list() -> None:
         if key not in st.session_state:
             st.session_state[key] = job_id in st.session_state.chosen_job_ids
         with st.container(border=True):
-            check_col, content_col = st.columns([1, 16], vertical_alignment="top")
+            check_col, content_col = st.columns(
+                COLUMN_RATIOS["job_card"], vertical_alignment="top"
+            )
             with check_col:
                 st.checkbox(
                     f"选择{job['title']}",
@@ -950,7 +1092,9 @@ def render_job_list() -> None:
                 st.write(preview[:170] + ("…" if len(preview) > 170 else ""))
                 with st.expander("查看完整 JD"):
                     st.write(job["jd_text"])
-                link_col, remove_col, _ = st.columns([2, 1, 7])
+                link_col, remove_col, _ = st.columns(
+                    COLUMN_RATIOS["job_card_actions"]
+                )
                 with link_col:
                     if job["url"]:
                         st.link_button("查看来源页面", job["url"], key=f"list-link-{job_id}")
@@ -1030,7 +1174,7 @@ def render_single_analysis_page() -> None:
 
     st.text_area(
         "将发送给模型的简历文字（可以删去姓名、地址等信息）",
-        height=260,
+        height=COMPONENT_HEIGHTS["resume_editor"],
         max_chars=16000,
         key="resume_text",
         on_change=reset_resume_consent,
@@ -1108,7 +1252,7 @@ def render_group_resume_section(profile: JobGroupProfile, profile_id: str) -> No
 
     st.text_area(
         "将发送给模型的简历文字（可以继续删除个人信息）",
-        height=260,
+        height=COMPONENT_HEIGHTS["resume_editor"],
         max_chars=16000,
         key=text_key,
         on_change=reset_consent,
@@ -1207,6 +1351,11 @@ def render_group_analysis_page() -> None:
 def render_analysis_center() -> None:
     """Offer two related analysis depths without giving them equal priority."""
 
+    render_page_intro(
+        "ANALYZE",
+        "把岗位信息变成行动建议",
+        "先看多份同类 JD 的共同要求，或在准备具体投递时精读一个岗位。",
+    )
     if st.session_state.get("analysis_mode") not in ("岗位方向画像", "单岗位精读"):
         st.session_state.analysis_mode = "岗位方向画像"
     st.segmented_control(
@@ -1227,60 +1376,97 @@ def render_analysis_center() -> None:
         render_single_analysis_page()
 
 
-def render_home_page() -> None:
-    """A calm starting page that can later sit in front of account sign-in."""
+def render_page_intro(kicker: str, title: str, copy: str) -> None:
+    """Give every workspace page the same adjustable visual hierarchy."""
 
     st.markdown(
-        """
-        <section class="hero">
-            <div class="hero-eyebrow">JOB DIRECTION · EVIDENCE FIRST</div>
-            <h1>别只读一份 JD。<br>先看清一个岗位方向。</h1>
-            <p>收集多个真实岗位，找出反复出现的职责与能力要求；再把这些有原文依据的岗位信号，与你的简历逐项对照。</p>
+        f"""
+        <section class="page-intro">
+            <div class="page-kicker">{kicker}</div>
+            <h1>{title}</h1>
+            <p>{copy}</p>
         </section>
         """,
         unsafe_allow_html=True,
     )
-    start_col, continue_col, _ = st.columns([2, 2, 4])
-    with start_col:
-        st.button(
-            "开始收集岗位",
-            type="primary",
-            on_click=open_page,
-            args=("找岗位",),
-            use_container_width=True,
-        )
-    with continue_col:
-        st.button(
-            f"查看我的岗位（{len(st.session_state.saved_jobs)}）",
-            on_click=open_page,
-            args=("我的岗位",),
-            disabled=not st.session_state.saved_jobs,
-            use_container_width=True,
-        )
 
-    st.markdown('<div class="section-kicker">WHAT YOU GET</div>', unsafe_allow_html=True)
-    st.subheader("从零散招聘信息，到可执行的准备方向")
-    feature_one, feature_two, feature_three = st.columns(3)
-    with feature_one:
-        with st.container(border=True):
-            st.markdown("#### 01 · 岗位方向画像")
-            st.write("汇总 2–10 份同类 JD，识别高频职责、能力、工具和硬性条件。")
-    with feature_two:
-        with st.container(border=True):
-            st.markdown("#### 02 · 原文依据")
-            st.write("每项结论都能展开查看来自哪条岗位，频率由程序计算，不展示虚假匹配分。")
-    with feature_three:
-        with st.container(border=True):
-            st.markdown("#### 03 · 两种简历对照")
-            st.write("既能面向整个岗位方向制定计划，也能在真正投递前精读某一个岗位。")
 
-    st.markdown('<div class="section-kicker">HOW IT WORKS</div>', unsafe_allow_html=True)
-    with st.container(border=True):
-        step_one, step_two, step_three = st.columns(3)
-        step_one.markdown("**1　收集**  \n自动搜索，或手动加入其他平台的 JD。")
-        step_two.markdown("**2　筛选**  \n勾选同类岗位，并检查公司与样本数量。")
-        step_three.markdown("**3　分析**  \n先生成方向画像，再按需要对照简历。")
-    st.caption("浏览、搜索、添加和勾选都不会调用 DeepSeek。每一次可能产生费用的请求都会提前说明并要求确认。")
+def render_landing_page() -> None:
+    """Render the full-screen first visit separately from the workspace."""
+
+    st.markdown(
+        """
+        <style>
+        [data-testid="stHeader"] { display: none; }
+        .stApp { background: var(--landing-canvas); }
+        [data-testid="stAppViewContainer"] .block-container {
+            max-width: none !important;
+            padding: 0 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    with st.container(key="landing-screen"):
+        st.markdown(
+            """
+            <div class="landing-brand">
+                <span class="brand-dot"></span>
+                <span>求职对照台</span>
+                <span class="landing-brand-note">公开测试</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        with st.container(key="landing-hero"):
+            st.markdown(
+                """
+                <div class="landing-eyebrow">JOB DIRECTION · EVIDENCE FIRST</div>
+                <h1 class="landing-title">别只读一份 JD。<br>先看清一个岗位方向。</h1>
+                <p class="landing-copy">收集多个真实岗位，找出反复出现的职责与能力要求；再把这些有原文依据的岗位信号，与你的简历逐项对照。</p>
+                """,
+                unsafe_allow_html=True,
+            )
+            with st.container(key="landing-action"):
+                st.button(
+                    "进入求职对照台",
+                    type="primary",
+                    on_click=enter_app,
+                    use_container_width=True,
+                )
+            st.markdown(
+                """
+                <div class="landing-badge-row">
+                    <span class="landing-badge">多 JD 方向画像</span>
+                    <span class="landing-badge">每项结论保留原文证据</span>
+                    <span class="landing-badge">支持单岗位精读</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        st.markdown(
+            """
+            <div class="landing-feature-grid">
+                <div class="landing-feature-card">
+                    <span>01 · COLLECT</span>
+                    <h3>收集真实岗位</h3>
+                    <p>自动搜索或粘贴其他平台的 JD，连续加入，不在页面间来回跳转。</p>
+                </div>
+                <div class="landing-feature-card">
+                    <span>02 · COMPARE</span>
+                    <h3>识别共同要求</h3>
+                    <p>用 2–10 份同类岗位形成方向画像，并保留可核对的岗位原文。</p>
+                </div>
+                <div class="landing-feature-card">
+                    <span>03 · ACT</span>
+                    <h3>得到准备建议</h3>
+                    <p>根据岗位方向或具体投递目标，与简历逐项对照并安排下一步。</p>
+                </div>
+            </div>
+            <p class="landing-footnote">搜索、添加和勾选不会调用 DeepSeek；每次模型请求都会提前说明并要求确认。</p>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_guide_content() -> None:
@@ -1302,9 +1488,26 @@ def render_privacy_content() -> None:
 
 brand_html = '<div class="brand-mark"><span class="brand-dot"></span><span>求职对照台</span></div>'
 
+if not st.session_state.entered_app:
+    render_landing_page()
+    st.stop()
+
+if st.session_state.pop("scroll_workspace_top", False):
+    # Streamlit keeps the old scroll offset across a rerun.  Reset it once so
+    # the workspace always opens at its own header after the landing CTA.
+    components.html(
+        """
+        <script>
+        const main = window.parent.document.querySelector('[data-testid="stMain"]');
+        if (main) requestAnimationFrame(() => main.scrollTo({top: 0, left: 0}));
+        </script>
+        """,
+        height=0,
+    )
+
 with st.container(key="desktop-header"):
     brand_col, guide_col, privacy_col, account_col = st.columns(
-        [5.2, 1.15, 1.45, 1.8], vertical_alignment="center"
+        COLUMN_RATIOS["desktop_header"], vertical_alignment="center"
     )
     with brand_col:
         st.markdown(brand_html, unsafe_allow_html=True)
@@ -1323,7 +1526,9 @@ with st.container(key="desktop-header"):
         )
 
 with st.container(key="mobile-header"):
-    mobile_brand_col, mobile_help_col = st.columns([3.2, 1], vertical_alignment="center")
+    mobile_brand_col, mobile_help_col = st.columns(
+        COLUMN_RATIOS["mobile_header"], vertical_alignment="center"
+    )
     with mobile_brand_col:
         st.markdown(brand_html, unsafe_allow_html=True)
     with mobile_help_col:
@@ -1336,15 +1541,13 @@ with st.container(key="mobile-header"):
 
 page = st.segmented_control(
     "页面",
-    ["首页", "找岗位", "我的岗位", "分析中心"],
+    ["找岗位", "我的岗位", "分析中心"],
     required=True,
     key="active_page",
     label_visibility="collapsed",
 )
 st.divider()
-if page == "首页":
-    render_home_page()
-elif page == "找岗位":
+if page == "找岗位":
     render_find_page()
 elif page == "我的岗位":
     render_job_list()

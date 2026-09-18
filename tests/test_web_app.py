@@ -29,20 +29,28 @@ class WebAppFlowTests(unittest.TestCase):
         app = AppTest.from_file(str(APP_FILE)).run()
 
         self.assertFalse(app.exception)
-        self.assertEqual(app.session_state["active_page"], "首页")
+        self.assertFalse(app.session_state["entered_app"])
+        self.assertEqual(app.session_state["active_page"], "找岗位")
         self.assertEqual(len(app.text_area), 0)
         self.assertEqual(len(app.json), 0)
         self.assertIn("别只读一份 JD", " ".join(item.value for item in app.markdown))
-        # 桌面端两个入口，手机端一个合并入口；CSS 只显示对应版本。
-        self.assertEqual(len(app.get("popover")), 3)
+        self.assertEqual(len(app.get("popover")), 0)
+        self.assertEqual(len(app.get("button_group")), 0)
 
-        next(button for button in app.button if button.label == "开始收集岗位").click().run()
+        next(button for button in app.button if button.label == "进入求职对照台").click().run()
+        self.assertTrue(app.session_state["entered_app"])
         self.assertEqual(app.session_state["active_page"], "找岗位")
         self.assertEqual(len(app.text_area), 1)  # Manual JD form is available.
         self.assertEqual(
             [tab.label for tab in app.tabs],
             ["自动搜索（Offer岛）", "手动添加 JD"],
         )
+        self.assertEqual(
+            app.get("button_group")[0].options,
+            ["找岗位", "我的岗位", "分析中心"],
+        )
+        # 桌面端两个入口，手机端一个合并入口；CSS 只显示对应版本。
+        self.assertEqual(len(app.get("popover")), 3)
 
         app.get("button_group")[0].set_value("我的岗位").run()
         self.assertFalse(app.exception)
