@@ -6,7 +6,6 @@ from collections import Counter
 from urllib.parse import urlparse
 
 import streamlit as st
-import streamlit.components.v1 as components
 from dotenv import load_dotenv
 from openai import (
     APIConnectionError,
@@ -1495,14 +1494,14 @@ if not st.session_state.entered_app:
 if st.session_state.pop("scroll_workspace_top", False):
     # Streamlit keeps the old scroll offset across a rerun.  Reset it once so
     # the workspace always opens at its own header after the landing CTA.
-    components.html(
+    st.html(
         """
         <script>
-        const main = window.parent.document.querySelector('[data-testid="stMain"]');
+        const main = document.querySelector('[data-testid="stMain"]');
         if (main) requestAnimationFrame(() => main.scrollTo({top: 0, left: 0}));
         </script>
         """,
-        height=0,
+        unsafe_allow_javascript=True,
     )
 
 with st.container(key="desktop-header"):
