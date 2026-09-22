@@ -1,0 +1,12 @@
+.git
+.env*
+!.env.example
+.venv
+**/__pycache__
+**/.pytest_cache
+frontend/node_modules
+frontend/dist
+.streamlit/secrets.toml
+.impeccable
+tests
+sample_resume_content_ops.docx

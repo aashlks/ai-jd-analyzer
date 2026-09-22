@@ -5,6 +5,8 @@
 
 # Project-local Python environment.
 .venv/
+frontend/node_modules/
+frontend/dist/
 
 # Python cache and test artifacts.
 __pycache__/

@@ -5,60 +5,65 @@ CSS 尺寸要保留 ``px``、``rem`` 或 ``vw`` 等单位。
 """
 
 
-# 颜色：想尝试另一套视觉风格时，优先修改这里的十六进制色值。
+# 像一本可核对原文的求职研究手册：纸张承载长文本，墨色保证阅读，
+# 松绿表示已确认的岗位信号，赭色提示来源与注释。
 COLORS = {
-    "ink": "#233247",
-    "muted": "#718092",
-    "blue": "#7998b2",
-    "blue_dark": "#526f89",
-    "blue_pale": "#eaf1f7",
-    "blue_mist": "#f1f5f9",
-    "line": "#dce6ee",
-    "paper": "#ffffff",
-    "canvas": "#f5f8fb",
-    "landing_canvas": "#f2f6fa",
+    "ink": "#243733",
+    "muted": "#5f6f69",
+    "signal": "#31766b",
+    "signal_dark": "#195b52",
+    "signal_pale": "#e4f0e8",
+    "signal_mist": "#f0f5ee",
+    "annotation": "#a65d3b",
+    "annotation_pale": "#f9eee5",
+    "line": "#d5dcd3",
+    "paper": "#fffefa",
+    "canvas": "#f6f5ef",
+    "landing_canvas": "#eeeee4",
 }
 
 
 # 工作区通用尺寸：集中控制页面宽度、留白、卡片和按钮，不用去 web_app.py 到处找数字。
 SIZES = {
-    "app_max_width": "1160px",
-    "app_top_padding": "1.15rem",
+    "app_max_width": "1180px",
+    "app_top_padding": "1.45rem",
     "app_bottom_padding": "3.5rem",
     "header_min_height": "3.2rem",
-    "section_gap": "1.25rem",
-    "panel_radius": "18px",
-    "panel_padding": "1.15rem",
-    "panel_shadow": "0 12px 34px rgba(63, 86, 108, 0.055)",
+    "section_gap": "1.35rem",
+    "panel_radius": "12px",
+    "panel_padding": "1.2rem",
+    "panel_shadow": "0 10px 28px rgba(38, 60, 49, 0.045)",
     "button_height": "2.7rem",
-    "button_radius": "11px",
-    "input_radius": "10px",
-    "metric_radius": "16px",
-    "page_intro_padding": "1.45rem 1.6rem",
-    "page_intro_radius": "20px",
-    "page_title_size": "clamp(1.7rem, 3vw, 2.35rem)",
+    "button_radius": "7px",
+    "input_radius": "7px",
+    "metric_radius": "10px",
+    "page_intro_padding": "1.65rem 2rem",
+    "page_intro_radius": "12px",
+    "page_title_size": "clamp(2rem, 3.7vw, 3.15rem)",
     "page_copy_width": "720px",
 }
 
 
 # 独立欢迎页尺寸：只影响用户首次进入时看到的全屏页面。
 LANDING = {
-    "landing_max_width": "1180px",
+    "landing_max_width": "1240px",
     "landing_min_height": "100vh",
     "landing_outer_padding": "clamp(1.25rem, 4vw, 3.5rem)",
-    "landing_hero_padding": "clamp(2rem, 6vw, 5.25rem)",
-    "landing_hero_radius": "32px",
-    "landing_title_size": "clamp(3rem, 7vw, 6.6rem)",
-    "landing_title_width": "980px",
-    "landing_copy_width": "720px",
-    "landing_cta_width": "260px",
-    "landing_feature_radius": "18px",
+    "landing_hero_padding": "clamp(1.7rem, 5vw, 4.5rem)",
+    "landing_hero_radius": "16px",
+    "landing_title_size": "clamp(3rem, 5.8vw, 5.8rem)",
+    "landing_title_width": "720px",
+    "landing_copy_width": "570px",
+    "landing_cta_width": "240px",
+    "landing_feature_radius": "10px",
     "landing_feature_min_height": "150px",
 }
 
 
 TYPOGRAPHY = {
-    "body_font": '"Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif',
+    "body_font": '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif',
+    "display_font": '"Iowan Old Style", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", Georgia, serif',
+    "mono_font": '"IBM Plex Mono", "Cascadia Code", Consolas, monospace',
     "body_size": "16px",
     "small_size": ".88rem",
     "body_line_height": "1.7",
@@ -67,6 +72,7 @@ TYPOGRAPHY = {
 
 # 各区块横向比例：只改数字即可；数字越大，对应列分到的空间越多。
 COLUMN_RATIOS = {
+    "landing_hero": [1.35, 1],
     "desktop_header": [5.4, 1.15, 1.45, 1.8],
     "mobile_header": [3.2, 1],
     "pagination": [1, 1, 5],

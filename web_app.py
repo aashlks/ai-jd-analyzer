@@ -62,28 +62,36 @@ PAGE_CSS = """
     :root {
         __CSS_VARIABLES__
     }
-    html, body, [class*="css"] {
+    html, body, .stApp, .stApp button, .stApp input, .stApp textarea {
         font-family: var(--body-font);
         font-size: var(--body-size);
     }
     .stApp {
         background:
-            radial-gradient(circle at 92% 2%, rgba(139, 170, 197, .16), transparent 28rem),
+            radial-gradient(circle at 95% 4%, rgba(49, 118, 107, .075), transparent 30rem),
             var(--canvas);
         color: var(--ink);
     }
-    [data-testid="stHeader"] { background: rgba(245, 248, 251, .82); }
+    [data-testid="stHeader"] { background: rgba(246, 245, 239, .9); }
     #MainMenu, footer, [data-testid="stToolbar"] { visibility: hidden; }
     .block-container {
         max-width: var(--app-max-width);
         padding-top: var(--app-top-padding);
         padding-bottom: var(--app-bottom-padding);
     }
-    h1, h2, h3, h4 { color: var(--ink); letter-spacing: -0.02em; }
+    h1, h2, h3, h4 { color: var(--ink); letter-spacing: -.025em; }
+    .stApp h1, .stApp h2 { font-family: var(--display-font) !important; font-weight: 700; }
+    h2 { margin-top: 1.8rem; }
     p, label { color: var(--ink); line-height: var(--body-line-height); }
     [data-testid="stCaptionContainer"] p { color: var(--muted); }
+    a { color: var(--signal-dark); text-underline-offset: 3px; }
+    :where(button, input, textarea, a):focus-visible {
+        outline: 3px solid var(--annotation);
+        outline-offset: 2px;
+    }
+    hr { border-color: var(--line) !important; opacity: 1 !important; }
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, .88);
+        background: var(--paper);
         border-color: var(--line);
         border-radius: var(--panel-radius);
         box-shadow: var(--panel-shadow);
@@ -91,120 +99,184 @@ PAGE_CSS = """
     }
     .stButton > button, .stLinkButton > a {
         border-radius: var(--button-radius);
-        border-color: #cddae5;
+        border-color: var(--line);
         min-height: var(--button-height);
-        transition: all .16s ease;
+        background: var(--paper);
+        color: var(--ink);
+        transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
         font-weight: 600;
     }
     .stButton > button:hover, .stLinkButton > a:hover {
-        border-color: var(--blue);
-        color: var(--blue-dark);
+        border-color: var(--signal);
+        color: var(--signal-dark);
+        background: var(--signal-mist);
         transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(25, 91, 82, .08);
     }
     .stButton > button[kind="primary"] {
-        background: var(--blue-dark);
-        border-color: var(--blue-dark);
+        background: var(--signal-dark);
+        border-color: var(--signal-dark);
         color: white;
     }
     .stButton > button[kind="primary"] p { color: white; }
+    .stButton > button[kind="primary"]:hover {
+        background: var(--signal);
+        border-color: var(--signal);
+        color: white;
+    }
     .stButton > button:disabled {
-        background: #edf2f6 !important;
-        border-color: #dce5ec !important;
-        color: #8b99a7 !important;
+        background: #eef0e9 !important;
+        border-color: var(--line) !important;
+        color: #78857e !important;
         opacity: 1;
         transform: none;
     }
-    [data-baseweb="tab-list"] { gap: .55rem; }
+    [data-baseweb="tab-list"] { gap: .45rem; border-bottom-color: var(--line); }
     [data-baseweb="tab"] {
-        border-radius: 9px 9px 0 0;
+        border-radius: 7px 7px 0 0;
         padding-left: 1.1rem;
         padding-right: 1.1rem;
     }
+    [data-baseweb="tab"][aria-selected="true"] { color: var(--signal-dark); }
     [data-baseweb="input"] > div, [data-baseweb="textarea"] > div,
     [data-baseweb="select"] > div {
         background: var(--paper);
         border-color: var(--line);
         border-radius: var(--input-radius);
     }
+    [data-baseweb="input"]:focus-within > div,
+    [data-baseweb="textarea"]:focus-within > div {
+        border-color: var(--signal);
+        box-shadow: 0 0 0 2px var(--signal-pale);
+    }
     [data-testid="stMetric"] {
         background: var(--paper);
         border: 1px solid var(--line);
         border-radius: var(--metric-radius);
         padding: 1rem 1.1rem;
+        border-top: 3px solid var(--signal);
     }
+    [data-testid="stMetricValue"] { font-family: var(--display-font); color: var(--signal-dark); }
+    [data-testid="stProgress"] > div > div { background-color: var(--signal); }
+    [data-testid="stAlert"] { border-radius: 8px; }
+    [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]),
+    [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) {
+        background: var(--signal-pale) !important;
+        border-left: 3px solid var(--signal);
+    }
+    [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) {
+        background: var(--annotation-pale) !important;
+        border-left: 3px solid var(--annotation);
+    }
+    [data-testid="stExpander"] { border-color: var(--line); border-radius: 8px; }
     .st-key-desktop-header {
         min-height: var(--header-min-height);
-        padding: .15rem 0 .85rem;
+        padding: .1rem 0 .8rem;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: .9rem;
     }
     .brand-mark {
         display: flex;
         align-items: center;
-        gap: .7rem;
+        gap: .65rem;
         min-height: 2.75rem;
         font-size: 1.05rem;
         font-weight: 700;
         color: var(--ink);
-        letter-spacing: .01em;
+        letter-spacing: .02em;
     }
-    .brand-dot {
-        width: 1.8rem;
-        height: 1.8rem;
-        border: 1px solid #91a9bd;
-        border-radius: 50%;
+    .brand-sigil {
+        width: 1.85rem;
+        height: 1.85rem;
+        border: 1px solid var(--signal-dark);
+        border-radius: 5px;
         position: relative;
         display: inline-block;
+        background: var(--paper);
+        box-shadow: 3px 3px 0 var(--signal-pale);
     }
-    .brand-dot:after {
+    .brand-sigil:before, .brand-sigil:after {
         content: "";
         position: absolute;
-        width: .55rem;
-        height: .55rem;
-        background: #7898b3;
-        border-radius: 50%;
-        top: .57rem;
-        left: .57rem;
+        height: 2px;
+        background: var(--signal-dark);
+        left: .38rem;
     }
+    .brand-sigil:before { width: .95rem; top: .64rem; }
+    .brand-sigil:after { width: .62rem; top: 1rem; }
     .page-intro {
+        position: relative;
+        overflow: hidden;
         padding: var(--page-intro-padding);
         border: 1px solid var(--line);
+        border-left: 5px solid var(--signal-dark);
         border-radius: var(--page-intro-radius);
-        background: linear-gradient(135deg, rgba(255,255,255,.96), var(--blue-mist));
+        background: var(--paper);
         box-shadow: var(--panel-shadow);
-        margin: .7rem 0 var(--section-gap);
+        margin: 1.2rem 0 var(--section-gap);
+    }
+    .page-intro:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: min(34%, 220px);
+        height: 100%;
+        background: repeating-linear-gradient(0deg, transparent 0, transparent 28px, var(--line) 29px);
+        opacity: .45;
+        pointer-events: none;
+        mask-image: linear-gradient(90deg, transparent, black);
     }
     .page-kicker, .section-kicker {
-        color: var(--blue-dark);
-        font-size: .78rem;
+        color: var(--annotation);
+        font-family: var(--mono-font);
+        font-size: .76rem;
         font-weight: 700;
-        letter-spacing: .14em;
+        letter-spacing: .12em;
         text-transform: uppercase;
-        margin-bottom: .45rem;
+        margin-bottom: .55rem;
     }
     .page-intro h1 {
+        position: relative;
+        z-index: 1;
         font-size: var(--page-title-size);
-        line-height: 1.18;
-        margin: 0 0 .5rem;
+        line-height: 1.22;
+        margin: 0 0 .55rem;
     }
     .page-intro p {
+        position: relative;
+        z-index: 1;
         max-width: var(--page-copy-width);
         color: var(--muted);
         margin: 0;
     }
+    .page-step {
+        color: var(--signal-dark);
+        background: var(--signal-pale);
+        padding: .2rem .43rem;
+        border-radius: 4px;
+        margin-right: .7rem;
+        letter-spacing: 0;
+    }
     div[data-testid="stButtonGroup"] {
-        background: rgba(255, 255, 255, .7);
+        background: var(--paper);
         border: 1px solid var(--line);
-        border-radius: calc(var(--button-radius) + 2px);
+        border-radius: var(--button-radius);
         padding: .22rem;
         width: fit-content;
     }
     div[data-testid="stButtonGroup"] button {
-        border-radius: var(--button-radius);
+        border-radius: 5px;
         min-height: 2.45rem;
         padding-left: 1.15rem;
         padding-right: 1.15rem;
     }
+    div[data-testid="stButtonGroup"] button[aria-pressed="true"] {
+        background: var(--signal-pale);
+        color: var(--signal-dark);
+    }
 
-    /* The welcome screen is a separate full-viewport composition. */
+    /* A readable research cover, followed by a concrete (clearly labeled) example. */
     .st-key-landing-screen {
         width: min(var(--landing-max-width), 100%);
         min-height: var(--landing-min-height);
@@ -218,64 +290,117 @@ PAGE_CSS = """
         display: flex;
         align-items: center;
         gap: .75rem;
-        font-weight: 750;
+        font-weight: 700;
         letter-spacing: .01em;
-        margin-bottom: 1.35rem;
+        margin-bottom: 1.15rem;
     }
     .landing-brand-note {
-        color: var(--blue-dark);
-        background: var(--blue-pale);
-        border-radius: 999px;
-        font-size: .76rem;
-        padding: .28rem .62rem;
+        color: var(--annotation);
+        border: 1px solid #e7cdb9;
+        background: var(--annotation-pale);
+        border-radius: 4px;
+        font-size: .73rem;
+        padding: .2rem .5rem;
     }
     .st-key-landing-hero {
         padding: var(--landing-hero-padding);
-        border: 1px solid rgba(190, 207, 221, .8);
+        border: 1px solid var(--line);
         border-radius: var(--landing-hero-radius);
         background:
-            radial-gradient(circle at 88% 5%, rgba(130, 165, 194, .23), transparent 28rem),
-            linear-gradient(145deg, rgba(255,255,255,.99), rgba(235,242,248,.92));
-        box-shadow: 0 28px 80px rgba(55, 80, 104, .11);
+            linear-gradient(90deg, transparent calc(100% - 1px), rgba(38, 60, 49, .035) 100%),
+            var(--paper);
+        background-size: 32px 32px, auto;
+        box-shadow: 0 24px 60px rgba(42, 65, 51, .08);
     }
+    .st-key-landing-hero [data-testid="stHorizontalBlock"] { align-items: center; }
+    .st-key-landing-hero [data-testid="stColumn"] { min-width: 0; }
+    .st-key-landing-hero [data-testid="stColumn"]:first-child { padding-right: clamp(.5rem, 2vw, 2rem); }
+    .st-key-landing-hero [data-testid="stColumn"]:last-child { padding-left: clamp(.5rem, 2vw, 2rem); }
+    .st-key-landing-hero [data-testid="stColumn"]:first-child [data-testid="stVerticalBlock"] { gap: 0; }
     .landing-eyebrow {
-        color: var(--blue-dark);
-        font-size: .78rem;
-        font-weight: 750;
-        letter-spacing: .18em;
+        color: var(--annotation);
+        font-family: var(--mono-font);
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .14em;
         text-transform: uppercase;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.3rem;
     }
     .landing-title {
         max-width: var(--landing-title-width);
         font-size: var(--landing-title-size);
-        line-height: .99;
+        line-height: 1.18;
         letter-spacing: -.055em;
-        margin: 0 0 1.55rem;
+        margin: 0 0 1.4rem;
     }
+    .landing-title em { color: var(--signal-dark); font-style: normal; }
     .landing-copy {
         max-width: var(--landing-copy-width);
         color: var(--muted);
-        font-size: 1.08rem;
-        line-height: 1.85;
-        margin: 0 0 1.65rem;
+        font-size: 1.03rem;
+        line-height: 1.8;
+        margin: 0 0 1.55rem;
     }
     .st-key-landing-action { width: var(--landing-cta-width); }
-    .st-key-landing-action button { min-height: 3.15rem; font-size: 1rem; }
+    .st-key-landing-action button { min-height: 3.2rem; font-size: 1rem; }
     .landing-badge-row {
         display: flex;
         flex-wrap: wrap;
-        gap: .55rem;
-        margin-top: 1.35rem;
+        gap: .5rem;
+        margin-top: 1.2rem;
     }
     .landing-badge {
-        color: var(--blue-dark);
-        background: rgba(255,255,255,.7);
+        color: var(--signal-dark);
+        background: var(--signal-mist);
         border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: .38rem .72rem;
-        font-size: var(--small-size);
+        border-radius: 4px;
+        padding: .32rem .55rem;
+        font-size: .78rem;
     }
+    .sample-sheet {
+        position: relative;
+        background: #214b45;
+        color: #f4f4eb;
+        border-radius: 11px;
+        padding: clamp(1.3rem, 3vw, 2rem);
+        box-shadow: 10px 11px 0 var(--signal-pale);
+        transform: rotate(1deg);
+        animation: sheet-arrive .7s ease both;
+    }
+    .sample-sheet:before {
+        content: "";
+        position: absolute;
+        top: 1.15rem;
+        right: 1.4rem;
+        width: 2.1rem;
+        height: 2.1rem;
+        border: 1px solid rgba(244,244,235,.5);
+        border-radius: 50%;
+    }
+    .sample-sheet:after {
+        content: "";
+        position: absolute;
+        top: 1.65rem;
+        right: 1.9rem;
+        width: 1.1rem;
+        border-top: 1px solid rgba(244,244,235,.5);
+        transform: rotate(-35deg);
+    }
+    .sample-sheet p, .sample-sheet h2 { color: inherit; }
+    .sample-overline, .sample-foot {
+        color: #c7dfd2 !important;
+        font-family: var(--mono-font);
+        font-size: .69rem;
+        letter-spacing: .09em;
+    }
+    .sample-sheet h2 { font-size: clamp(1.25rem, 2vw, 1.75rem); margin: .55rem 0 .28rem; }
+    .sample-sub { color: #d1e2d7 !important; font-size: .82rem; margin: 0 0 1.35rem; }
+    .sample-signal { padding: .72rem 0; border-top: 1px solid rgba(240,245,238,.24); }
+    .sample-signal-top { display: flex; justify-content: space-between; gap: .75rem; font-size: .87rem; }
+    .sample-signal-top strong { font-family: var(--mono-font); font-size: .79rem; color: #f8d5ad; }
+    .sample-track { height: 5px; background: rgba(244,244,235,.22); margin-top: .6rem; border-radius: 3px; overflow: hidden; }
+    .sample-track i { display: block; height: 100%; width: var(--sample-width); background: #eab887; transform-origin: left; animation: fill-signal .85s .25s both; }
+    .sample-foot { margin: 1.15rem 0 0; letter-spacing: 0; line-height: 1.6; }
     .landing-feature-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -284,31 +409,43 @@ PAGE_CSS = """
     }
     .landing-feature-card {
         min-height: var(--landing-feature-min-height);
-        padding: 1.35rem;
-        background: rgba(255,255,255,.78);
+        padding: 1.2rem 1.35rem;
+        background: var(--paper);
         border: 1px solid var(--line);
         border-radius: var(--landing-feature-radius);
+        transition: transform .2s ease, border-color .2s ease;
     }
+    .landing-feature-card:hover { transform: translateY(-3px); border-color: var(--signal); }
     .landing-feature-card span {
-        color: var(--blue-dark);
-        font-size: .77rem;
-        font-weight: 750;
-        letter-spacing: .12em;
+        color: var(--annotation);
+        font-family: var(--mono-font);
+        font-size: .74rem;
+        font-weight: 700;
+        letter-spacing: .08em;
     }
-    .landing-feature-card h3 { margin: .55rem 0 .45rem; font-size: 1.05rem; }
-    .landing-feature-card p { margin: 0; color: var(--muted); font-size: .91rem; }
+    .landing-feature-card h3 { margin: .5rem 0 .4rem; font-size: 1.06rem; }
+    .landing-feature-card p { margin: 0; color: var(--muted); font-size: .9rem; }
     .landing-footnote { color: var(--muted); font-size: .82rem; margin: 1rem .2rem 0; }
+    @keyframes sheet-arrive { from { opacity: 0; transform: translateY(12px) rotate(2deg); } to { opacity: 1; transform: translateY(0) rotate(1deg); } }
+    @keyframes fill-signal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     .st-key-mobile-header { display: none; }
+    @media (max-width: 850px) {
+        .st-key-landing-hero [data-testid="stHorizontalBlock"] { flex-direction: column !important; }
+        .st-key-landing-hero [data-testid="stColumn"] { width: 100% !important; padding: 0 !important; }
+        .sample-sheet { margin: 2rem .6rem .4rem 0; transform: none; }
+        .landing-title { font-size: clamp(2.7rem, 8vw, 4.5rem); }
+    }
     @media (max-width: 700px) {
         .block-container { padding: 1rem 1rem 2.5rem; }
         .st-key-landing-screen { padding: 1rem; justify-content: flex-start; }
-        .st-key-landing-hero { padding: 2.5rem 1.35rem; border-radius: 24px; }
-        .landing-title { font-size: clamp(2.7rem, 14vw, 4.1rem); }
+        .st-key-landing-hero { padding: 2rem 1.25rem; border-radius: 12px; }
+        .landing-title { font-size: clamp(2.65rem, 12vw, 4.1rem); }
         .landing-copy { font-size: 1rem; }
         .st-key-landing-action { width: 100%; }
         .landing-feature-grid { grid-template-columns: 1fr; }
         .landing-feature-card { min-height: auto; }
         .page-intro { padding: 1.2rem; }
+        .page-intro:after { display: none; }
         .st-key-desktop-header { display: none; }
         .st-key-mobile-header { display: block; }
         .st-key-mobile-header [data-testid="stHorizontalBlock"] {
@@ -338,8 +475,15 @@ PAGE_CSS = """
             white-space: nowrap;
         }
         .brand-mark { font-size: .95rem; white-space: nowrap; }
-        .brand-dot { width: 1.55rem; height: 1.55rem; }
-        .brand-dot:after { top: .45rem; left: .45rem; }
+        .brand-sigil { width: 1.55rem; height: 1.55rem; }
+        .brand-sigil:before { top: .5rem; width: .8rem; }
+        .brand-sigil:after { top: .83rem; width: .5rem; }
+        div[data-testid="stButtonGroup"] { max-width: 100%; }
+        div[data-testid="stButtonGroup"] button { padding-left: .55rem; padding-right: .55rem; font-size: .88rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *, *:before, *:after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        .sample-sheet { transform: none; }
     }
     </style>
     """
@@ -633,6 +777,7 @@ def show_group_profile(profile: JobGroupProfile, jobs: list[dict]) -> None:
             with st.container(border=True):
                 st.markdown(f"**{signal.label}**")
                 st.caption(f"{signal.category} · {count}/{total} 个岗位提到 · 约 {percent}%")
+                st.progress(min(100, percent))
                 with st.expander("查看对应 JD 依据"):
                     for evidence in signal.evidence:
                         job = job_map.get(evidence.job_id)
@@ -1378,10 +1523,11 @@ def render_analysis_center() -> None:
 def render_page_intro(kicker: str, title: str, copy: str) -> None:
     """Give every workspace page the same adjustable visual hierarchy."""
 
+    step = {"COLLECT": "01 / 03", "SHORTLIST": "02 / 03", "ANALYZE": "03 / 03"}[kicker]
     st.markdown(
         f"""
         <section class="page-intro">
-            <div class="page-kicker">{kicker}</div>
+            <div class="page-kicker"><span class="page-step">{step}</span>{kicker}</div>
             <h1>{title}</h1>
             <p>{copy}</p>
         </section>
@@ -1410,7 +1556,7 @@ def render_landing_page() -> None:
         st.markdown(
             """
             <div class="landing-brand">
-                <span class="brand-dot"></span>
+                <span class="brand-sigil" aria-hidden="true"></span>
                 <span>求职对照台</span>
                 <span class="landing-brand-note">公开测试</span>
             </div>
@@ -1418,31 +1564,57 @@ def render_landing_page() -> None:
             unsafe_allow_html=True,
         )
         with st.container(key="landing-hero"):
-            st.markdown(
-                """
-                <div class="landing-eyebrow">JOB DIRECTION · EVIDENCE FIRST</div>
-                <h1 class="landing-title">别只读一份 JD。<br>先看清一个岗位方向。</h1>
-                <p class="landing-copy">收集多个真实岗位，找出反复出现的职责与能力要求；再把这些有原文依据的岗位信号，与你的简历逐项对照。</p>
-                """,
-                unsafe_allow_html=True,
-            )
-            with st.container(key="landing-action"):
-                st.button(
-                    "进入求职对照台",
-                    type="primary",
-                    on_click=enter_app,
-                    use_container_width=True,
+            story_col, example_col = st.columns(COLUMN_RATIOS["landing_hero"], gap="large")
+            with story_col:
+                st.markdown(
+                    """
+                    <div class="landing-eyebrow">FIELD NOTES / 求职研究手册</div>
+                    <h1 class="landing-title">别只读一份 JD。<br>先看清一个<em>岗位方向</em>。</h1>
+                    <p class="landing-copy">先收集相近岗位，再找出反复出现的职责与能力要求。每条结论都能回到招聘原文，最后再和你的简历对照。</p>
+                    """,
+                    unsafe_allow_html=True,
                 )
-            st.markdown(
-                """
-                <div class="landing-badge-row">
-                    <span class="landing-badge">多 JD 方向画像</span>
-                    <span class="landing-badge">每项结论保留原文证据</span>
-                    <span class="landing-badge">支持单岗位精读</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                with st.container(key="landing-action"):
+                    st.button(
+                        "进入求职对照台",
+                        type="primary",
+                        on_click=enter_app,
+                        use_container_width=True,
+                    )
+                st.markdown(
+                    """
+                    <div class="landing-badge-row">
+                        <span class="landing-badge">多 JD 方向画像</span>
+                        <span class="landing-badge">逐条核对原文</span>
+                        <span class="landing-badge">按需对照简历</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with example_col:
+                st.markdown(
+                    """
+                    <div class="sample-sheet" aria-label="岗位方向画像的界面示意，数据并非真实分析结果">
+                        <div class="sample-overline">画像预览 / 仅作界面示意</div>
+                        <h2>从零散 JD 到共同要求</h2>
+                        <p class="sample-sub">假设收集 5 份同类岗位，统计每项要求出现的岗位数</p>
+                        <div class="sample-signal">
+                            <div class="sample-signal-top"><span>跨团队沟通</span><strong>4 / 5</strong></div>
+                            <div class="sample-track"><i style="--sample-width:80%"></i></div>
+                        </div>
+                        <div class="sample-signal">
+                            <div class="sample-signal-top"><span>数据整理</span><strong>3 / 5</strong></div>
+                            <div class="sample-track"><i style="--sample-width:60%"></i></div>
+                        </div>
+                        <div class="sample-signal">
+                            <div class="sample-signal-top"><span>项目推进</span><strong>3 / 5</strong></div>
+                            <div class="sample-track"><i style="--sample-width:60%"></i></div>
+                        </div>
+                        <p class="sample-foot">正式分析会展示岗位来源和原文片段；以上频次均为演示数字。</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
         st.markdown(
             """
             <div class="landing-feature-grid">
@@ -1485,7 +1657,7 @@ def render_privacy_content() -> None:
     st.caption("请勿上传不愿交给第三方模型处理的敏感、机密或他人资料。")
 
 
-brand_html = '<div class="brand-mark"><span class="brand-dot"></span><span>求职对照台</span></div>'
+brand_html = '<div class="brand-mark"><span class="brand-sigil" aria-hidden="true"></span><span>求职对照台</span></div>'
 
 if not st.session_state.entered_app:
     render_landing_page()

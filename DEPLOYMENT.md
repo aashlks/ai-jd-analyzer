@@ -1,5 +1,7 @@
 # 把求职对照台发布为可分享网页
 
+> 本文只适用于已经上线的 **Streamlit 旧版**（入口 `web_app.py`）。新设计的 Ant Design Vue 页面需要 `api_server.py` 提供 Python ASGI 接口，目前只完成本地预览；把仓库推送到 GitHub 不会让 Streamlit Cloud 自动改用 Vue 页面，也不要把新 API 不加配额保护就公开发布。
+
 推荐先用 **Streamlit Community Cloud** 发布测试版。当前项目已经具备入口文件、依赖清单、主题配置和会话隔离；发布后每位访客可以独立收集岗位并生成分析，但刷新或关闭会话后数据可能消失。
 
 ## 发布前先知道三件事

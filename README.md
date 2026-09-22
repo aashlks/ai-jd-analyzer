@@ -2,11 +2,40 @@
 
 这是一个适合初学者理解和继续开发的 Python 项目。网页 **不限定技术岗或实习岗**：核心功能是从 2～10 份同类 JD 生成有原文依据的“岗位方向画像”，再按需与简历对照；原有的单岗位精读仍然保留。
 
-**在线体验：**[求职对照台（Streamlit）](https://ai-jd-analyzer-aashlks.streamlit.app/)
+**已上线的版本：**[求职对照台（Streamlit）](https://ai-jd-analyzer-aashlks.streamlit.app/)。**这次的 Ant Design Vue 改版目前只在本地完成，尚未替换该线上网址。**
 
 这是公开测试版。首次访问时如果应用处于休眠状态，按页面提示唤醒后等待片刻即可；无需登录 Streamlit。
 
-## 怎样试用本地网页
+## 新版：Ant Design Vue 页面（本地预览）
+
+页面面向探索职业方向的学生和初入职场者，**不限定技术岗**。用户最重要的任务是：找多份同类岗位、筛出可比较的样本、看有 JD 原文支撑的高频要求，最后再决定是否用简历对照。因此新版保留四条实际路由：`/` 欢迎页、`/find` 找岗位、`/saved` 我的岗位、`/analysis` 分析中心；“使用指南”只在点击后出现，不占据工作流程。
+
+新版采用蓝白色的岗位对照工作台：冷白背景承载长 JD，深蓝文字保持阅读对比，钴蓝只强调主操作、当前选择和可核对的样本数据。中文与英文统一使用清晰的无衬线字体栈，样本次数使用等宽数字。首页用明确标注的示例说明“多份 JD → 共同要求 → 原文依据”；找岗位页让搜索条件和结果在桌面端相邻、手机端顺序堆叠；岗位清单直接呈现勾选卡片。画像中的频率表示 **本次样本里出现的次数**，并非匹配分或录用概率。动效只用于控件状态变化，页面使用原生滚动，系统设置“减少动态效果”时会关闭过渡。组件使用 Ant Design Vue，业务路由由 Vue Router 管理；原来的搜索、勾选、画像、简历对照和报告下载逻辑继续由 Python 提供。
+
+产品边界与设计规则分别记录在 [PRODUCT.md](PRODUCT.md) 和 [DESIGN.md](DESIGN.md)，后续新增页面可直接沿用同一套蓝白视觉系统。
+
+想在本机打开新版，需要 Python 环境以及 Node.js、pnpm。在项目根目录先安装 Python 依赖；然后分别打开两个终端：
+
+```powershell
+# 终端一：在项目根目录启动 Python API
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn api_server:app --host 127.0.0.1 --port 8000
+```
+
+```powershell
+# 终端二：在项目根目录启动 Vue 开发服务器
+cd frontend
+pnpm install
+pnpm dev
+```
+
+浏览器打开开发服务器打印的网址，通常是 `http://127.0.0.1:5173`。第二个终端会把 `/api` 请求转发给第一个终端。若只想用**一个网址**预览，可在 `frontend` 目录运行 `pnpm build`，再只启动上面的 Python API，打开 `http://127.0.0.1:8000`；改了前端文件后需重新 `pnpm build`。两个终端中按 `Ctrl+C` 可停止服务。`pnpm` 不可用时，先检查 Node.js / pnpm 是否安装并能在 VS Code 终端运行。
+
+新版仍是公开测试原型：Key 只放服务端 `.env`，不会交给浏览器。搜索、添加、选择不调用 DeepSeek；模型请求必须单独确认。岗位清单保存在当前浏览标签的会话存储中，没有账号和长期保存。服务端的会话次数限制只是本地/小范围测试保护，**不能单独承担正式公开服务的费用安全**；上线新版前还需要确定适合 Python ASGI 的部署平台、账号或强配额及 API 平台消费上限。
+
+新版文件：`frontend/src/views/` 是四个页面，`frontend/src/style.css` 管理字体、配色、版式、响应式和动效，`frontend/src/store.js` 管理浏览会话中的岗位清单；`api_server.py` 将现有 Python 逻辑接到网页，保持 DeepSeek Key 在服务端。网页对用户展示的是可读的分析和建议，JSON 只在程序内部传递与校验。
+
+## 旧版：怎样试用本地 Streamlit 网页
 
 在项目目录的 VS Code 终端运行。如果已经打开旧网页，先按 `Ctrl+C` 停止服务，再重新启动：
 
@@ -17,7 +46,9 @@
 
 终端会显示一个本地网址，通常是 `http://localhost:8501`。用浏览器打开即可；关闭终端里的服务可按 `Ctrl+C`。
 
-网页采用低饱和蓝白配色。用户第一次进入时会先看到一个**独立的全屏欢迎页**；只有点击“进入求职对照台”后，才会打开真正的工作区。欢迎页不是导航中的一个功能页面。工作区按实际使用顺序分成三个页面，右上方的“使用指南”点开后才显示简短说明：
+旧版也采用“求职研究手册”的设计：暖纸张承载长篇 JD，深墨色保证阅读，松绿色标记可核对的岗位信号，赭色用于来源与步骤注释。中文衬线标题区分研究结论与操作文字，正文仍用清晰的无衬线字体；欢迎页的画像卡明确写着“界面示意”，不冒充真实分析结果。动效仅帮助理解证据频率和卡片层级，并尊重系统的减少动态效果设置。
+
+目标用户是正在探索不同职业方向的学生和初入职场者，不限行业。核心任务是**收集同类岗位 → 整理样本 → 看共同要求及原文证据 → 按需对照简历**；页面内容包括长 JD、来源、样本频率、隐私和费用提示，因此设计优先考虑可读性、出处和操作状态，而不是装饰。用户第一次进入时会先看到一个**独立的全屏欢迎页**；只有点击“进入求职对照台”后，才会打开真正的工作区。欢迎页不是导航中的一个功能页面。工作区按实际使用顺序分成三个页面，右上方的“使用指南”点开后才显示简短说明：
 
 1. **找岗位**：默认先展示“自动搜索（Offer岛）”，用户输入关键词、可选城市和用工类型即可找岗位；只有没有搜到或岗位来自 BOSS 等未接入来源时，才切换到“手动添加 JD”。Offer岛主要服务 AI 方向求职，所以**自动搜索无法覆盖所有行业**，这里也不爬取 BOSS 直聘。无论手动、逐条还是整页添加，成功后都停留在当前页面，方便连续收集。
 2. **我的岗位**：岗位以卡片展示，可以勾选、全选、全不选或移除。完全相同的 JD 不会重复加入，避免把重复内容计入频率。操作区位于卡片列表上方；已选样本会显示岗位数、已知公司数和公司分布。
@@ -39,9 +70,9 @@
 
 如果你之后有 Offer岛个人 API Key，可在本机 `.env` 添加 `OFFERDAO_API_KEY=你的Key`，但不要把它写进代码或提交到 Git。[Offer岛文档](https://offerdao.ai/docs)说明其 API 可用于查询并向用户推荐岗位，同时要求遵守[服务条款](https://offerdao.ai/terms)；本项目只做少量搜索和推荐，不批量抓取、转售内容。
 
-代码分工仍然清楚：`job_sources.py` 查询岗位候选；`group_analyzer.py` 生成多岗位画像并进行方向级简历对照；`resume_reader.py` 在本地读简历；`matcher.py` 负责单岗位精读；`models.py` 校验所有内部结构；`web_app.py` 负责交互、展示和当前浏览会话中的临时数据；`ui_config.py` 集中管理颜色与尺寸。`analyzer.py` 保留命令行单条 JD 结构化学习版。
+代码分工仍然清楚：`job_sources.py` 查询岗位候选；`group_analyzer.py` 生成多岗位画像并进行方向级简历对照；`resume_reader.py` 在本地读简历；`matcher.py` 负责单岗位精读；`models.py` 校验所有内部结构；旧版由 `web_app.py` 和 `ui_config.py` 负责展示，新版由 `api_server.py` 和 `frontend/` 负责展示。`analyzer.py` 保留命令行单条 JD 结构化学习版。
 
-## 怎样自己调整网页样式
+## 怎样自己调整旧版 Streamlit 样式
 
 以后想改版面时，优先打开 `ui_config.py`，不需要在长篇网页代码中到处寻找数字：
 
@@ -52,9 +83,9 @@
 - `COLUMN_RATIOS`：页头、分页按钮、岗位卡片和操作区各列所占宽度。
 - `COMPONENT_HEIGHTS`：JD 与简历文字框的高度。
 
-例如，想让主工作区更宽，可以把 `SIZES["app_max_width"]` 从 `1160px` 改大；想让欢迎页标题更小，可以调低 `LANDING["landing_title_size"]`；想换主色，则修改 `COLORS["blue_dark"]`。保存后 Streamlit 会自动刷新。`ui_config.py` 只负责外观，不处理岗位、简历或 API 逻辑，所以改错样式数值也不会改变分析流程。
+例如，想让主工作区更宽，可以把 `SIZES["app_max_width"]` 从 `1180px` 改大；想让欢迎页标题更小，可以调低 `LANDING["landing_title_size"]`；想换主色，则修改 `COLORS["signal_dark"]`。保存后 Streamlit 会自动刷新。`ui_config.py` 只负责外观，不处理岗位、简历或 API 逻辑，所以改错样式数值也不会改变分析流程。
 
-## 发布给其他人使用
+## 已上线的旧版
 
 项目已经部署到 [Streamlit Community Cloud](https://ai-jd-analyzer-aashlks.streamlit.app/)：`web_app.py` 是入口，`requirements.txt` 声明依赖，`.streamlit/config.toml` 保存非敏感主题设置；真实密钥通过线上 Secrets 注入。完整的 GitHub 推送、Secrets、上线验收和紧急换 Key 步骤见 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
@@ -90,7 +121,9 @@ ai-jd-analyzer/
 ├── main.py                 # 程序入口：读取 JD、处理错误、打印 JSON
 ├── analyzer.py             # 调用 LLM，并取得结构化分析结果
 ├── models.py               # 定义通用 JD 分析和简历反馈的 JSON 结构
-├── web_app.py              # 蓝白网页、岗位清单和分析流程
+├── web_app.py              # 旧版 Streamlit 网页、岗位清单和分析流程
+├── api_server.py           # 新版 Vue 使用的 Python API 和静态页面入口
+├── frontend/               # Ant Design Vue 页面、样式和 Vue Router
 ├── ui_config.py             # 可集中调节的颜色、尺寸、间距和列宽
 ├── job_sources.py          # 从 Offer岛 API 查询岗位候选
 ├── group_analyzer.py       # 多岗位方向画像与方向级简历对照
@@ -103,7 +136,7 @@ ai-jd-analyzer/
 ├── .env.example            # 环境变量模板，不含真实 Key
 ├── .gitignore              # 告诉 Git 不要记录哪些文件
 ├── .streamlit/
-│   ├── config.toml         # 部署和蓝白主题的基础设置
+│   ├── config.toml         # 旧版部署和主题的基础设置
 │   └── secrets.toml.example # 线上 Secrets 的安全格式示例
 ├── tests/
 │   ├── test_analyzer.py    # API 分析逻辑的离线测试
@@ -114,6 +147,7 @@ ai-jd-analyzer/
 │   ├── test_group_analyzer.py # 多岗位画像和方向级对照测试
 │   ├── test_report_export.py # 可读报告与安全文件名测试
 │   ├── test_web_app.py      # 页面顺序、岗位卡片与勾选流程测试
+│   ├── test_api_server.py   # 新版 HTTP 接口与费用确认测试
 │   └── test_models.py      # 通用字段数据结构的离线测试
 ├── DEPLOYMENT.md           # 发布为可分享网页的逐步说明
 └── README.md               # 你正在看的使用与学习说明
