@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ai-jd-analyzer-aashlks-vue
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: vue-preview
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/meta
+    autoDeployTrigger: commit
+    envVars:
+      - key: DEEPSEEK_MODEL
+        value: deepseek-flash
+      - key: MAX_MODEL_REQUESTS_PER_SESSION
+        value: "8"
